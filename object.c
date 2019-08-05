@@ -7,6 +7,7 @@
 //
 
 #include "labyrinth.h"
+#include <termios.h>
 
 
 //
@@ -59,8 +60,6 @@ tiletype_t CurrentBlockType (obj_t *obj)
 //
 // GateSide
 // Returns which side of the gate the object is on
-// LEFT or RIGHT if it's a GATE_H
-// TOP or BOTTOM if it's a GATE_V
 // (should never return SIDE_UNDEFINED, indicates error)
 //
 side_t GateSide (obj_t *obj)

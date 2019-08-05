@@ -13,19 +13,19 @@
 
 #define SHADE 1
 
-SDL_Window 		*window;
-SDL_Renderer 	*renderer;
-const uint8_t 	*keys;
-SDL_Surface 	*walls[WT_COUNT];
-SDL_Texture		*walltextures[WT_COUNT];
-SDL_Texture		*text;
+SDL_Window      *window;
+SDL_Renderer    *renderer;
+const uint8_t   *keys;
+SDL_Surface     *walls[WT_COUNT];
+SDL_Texture     *walltextures[WT_COUNT];
+SDL_Texture     *text;
 
-gamestate_t		gamestate;
-const float 	fov = ANG90 / 2;
-const float 	depth = 16.0f;
-const int		halfheight = WIN_H / 2;
-//int				wallindex; // which wall to draw, set by CheckBlock
-obj_t 			player;
+gamestate_t     gamestate;
+const float     fov = ANG90 / 2;
+const float     depth = 16.0f;
+const int       halfheight = WIN_H / 2;
+//int           wallindex; // which wall to draw, set by CheckBlock
+obj_t           player;
 
 // 'map' represents the entire "5-dimensional" world:
 // an array of NUMDIMS 2D-64*64 areas
@@ -142,22 +142,25 @@ bool WallCollision (obj_t *obj)
 
 
 
-void RenderFloor(uint8_t r, uint8_t g, uint8_t b)
+void RenderFloorAndCeiling(SDL_Color *floor, SDL_Color *ceiling)
 {
-    SDL_Rect floor = { 0, halfheight, WIN_W, halfheight };
-    SDL_SetRenderDrawColor(renderer, r, g, b, 255);
-    SDL_RenderFillRect(renderer, &floor);
-    
-}
+    int a;
+    SDL_Rect rect = { 0, 0, WIN_W, WIN_H };
 
-
-
-
-void RenderCeiling(uint8_t r, uint8_t g, uint8_t b)
-{
-    SDL_Rect ceil = { 0, 0, WIN_W, halfheight };
-    SDL_SetRenderDrawColor(renderer, r, g, b, 255);
-    SDL_RenderFillRect(renderer, &ceil);
+    SDL_SetRenderDrawColor(renderer, 0, 0, 0, 255);
+    SDL_RenderFillRect(renderer, &rect);
+    rect.h = 1;
+    for (; rect.y<WIN_H ; rect.y++)
+    {
+        if (rect.y < halfheight) {
+            a = (rect.y) * 2;
+            SDL_SetRenderDrawColor(renderer, ceiling->r, ceiling->g, ceiling->b, 255-a);
+        } else {
+            a = (halfheight - rect.y) * 2;
+            SDL_SetRenderDrawColor(renderer, floor->r, floor->g, floor->b, 255-a);
+        }
+        SDL_RenderFillRect(renderer, &rect);
+    }
 }
 
 
@@ -232,9 +235,10 @@ void PlayLoop (void)
         CheckBlock(&player); 	// do collisions and gate stuff
         
         // RENDER
-        
-        RenderFloor(80, 80, 80);
-        RenderCeiling(64, 64, 64);
+
+        SDL_Color f = { 64, 64, 64 };
+        SDL_Color c = { 128, 32, 0 };
+        RenderFloorAndCeiling(&f, &c);
         
         for (x=0; x < WIN_W; x++)
         {
